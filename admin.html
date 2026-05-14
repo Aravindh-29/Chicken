@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Aravindh Chicken Shop</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Loading Overlay -->
+  <div id="loader" class="loader-overlay">
+    <div class="spinner"></div>
+    <div id="loaderText" class="loader-text">Loading Dashboard...</div>
+  </div>
+
+  <!-- Password Modal -->
+  <div id="authModal" class="modal">
+    <div class="modal-content glass" style="padding: 30px;">
+      <h2 style="color:var(--primary); margin-bottom:15px;">Admin Login</h2>
+      <p style="color:var(--text-muted); margin-bottom:20px;">Please enter the designated admin password to proceed.</p>
+      <input type="password" id="adminPassword" placeholder="Admin Password">
+      <p id="authError" style="color:var(--primary); font-size:0.9rem; margin-top:10px; display:none;">Incorrect Password</p>
+      <button class="btn btn-success" style="width:100%; margin-top:20px;" onclick="verifyAdmin()">Login</button>
+    </div>
+  </div>
+
+  <div id="adminContent" style="display: none;">
+    <header>
+      <h1>👨‍🍳 Kitchen Dashboard</h1>
+      <p>Manage and process all incoming orders</p>
+    </header>
+
+    <div class="top-links">
+      <button class="btn" style="background:var(--bg-color); border: 1px solid var(--panel-border);" onclick="loadOrders(true)">🔄 Refresh Orders</button>
+      <a href="index.html" class="btn">🏠 Back to Shop</a>
+    </div>
+
+    <section class="container glass" style="max-width: 1000px;">
+      <h2>🛎️ Live Orders</h2>
+      <div id="orders">
+        <!-- Dynamic order cards injected here -->
+      </div>
+    </section>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

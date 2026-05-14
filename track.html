@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track Order | Aravindh Chicken Shop</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Loading Overlay -->
+  <div id="loader" class="loader-overlay">
+    <div class="spinner"></div>
+    <div id="loaderText" class="loader-text">Fetching data...</div>
+  </div>
+
+  <header>
+    <h1>📦 Track Your Order</h1>
+    <p>Enter your phone number to see the status</p>
+  </header>
+  
+  <div class="top-links">
+    <a href="index.html" class="btn btn-success">⬅ Back to Menu</a>
+  </div>
+
+  <section class="container glass">
+    <div style="display: flex; gap: 10px;">
+      <input type="text" id="trackPhone" placeholder="Enter Registration Phone Number" style="margin-top: 0;">
+      <button class="btn" style="margin: 0; white-space: nowrap;" onclick="trackOrder()">Track</button>
+    </div>
+
+    <div id="result" style="margin-top: 30px;">
+      <!-- Results will populate here -->
+    </div>
+  </section>
+
+  <script src="track.js"></script>
+</body>
+</html>

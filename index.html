@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aravindh Chicken Shop | Premium Dining</title>
+  <meta name="description" content="Order fresh & spicy chicken starters from Aravindh Chicken Shop.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Loading Overlay -->
+  <div id="loader" class="loader-overlay">
+    <div class="spinner"></div>
+    <div id="loaderText" class="loader-text">Processing...</div>
+  </div>
+
+  <header>
+    <h1>🍗 Aravindh Chicken Shop</h1>
+    <p>Fresh & Spicy Starters • Crafted with Passion</p>
+  </header>
+
+  <div class="top-links">
+    <a href="track.html" class="btn">📦 Track Your Order</a>
+  </div>
+
+  <section class="products">
+    <div class="card glass">
+      <img src="https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=800" alt="Chicken 65">
+      <div class="card-content">
+        <h2>Chicken 65</h2>
+        <p>₹120</p>
+        <button class="btn" onclick="addToCart('Chicken 65', 120)">Add To Cart</button>
+      </div>
+    </div>
+
+    <div class="card glass">
+      <img src="https://images.unsplash.com/photo-1562967916-eb82221dfb92?w=800" alt="Chicken Wings">
+      <div class="card-content">
+        <h2>Chicken Wings</h2>
+        <p>₹180</p>
+        <button class="btn" onclick="addToCart('Chicken Wings', 180)">Add To Cart</button>
+      </div>
+    </div>
+
+    <div class="card glass">
+      <img src="https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=800" alt="Chicken Lollipop">
+      <div class="card-content">
+        <h2>Chicken Lollipop</h2>
+        <p>₹200</p>
+        <button class="btn" onclick="addToCart('Chicken Lollipop', 200)">Add To Cart</button>
+      </div>
+    </div>
+
+    <div class="card glass">
+      <img src="https://images.unsplash.com/photo-1600891964092-4316c288032e?w=800" alt="Dragon Chicken">
+      <div class="card-content">
+        <h2>Dragon Chicken</h2>
+        <p>₹220</p>
+        <button class="btn" onclick="addToCart('Dragon Chicken', 220)">Add To Cart</button>
+      </div>
+    </div>
+
+    <div class="card glass">
+      <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800" alt="Pepper Chicken">
+      <div class="card-content">
+        <h2>Pepper Chicken</h2>
+        <p>₹250</p>
+        <button class="btn" onclick="addToCart('Pepper Chicken', 250)">Add To Cart</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="container glass">
+    <h2>🛒 Your Cart</h2>
+    
+    <ul id="cartItems">
+      <li style="justify-content: center; color: var(--text-muted); border: none;">Cart is empty</li>
+    </ul>
+
+    <h3 id="total">Total: ₹0</h3>
+
+    <div id="checkoutForm" style="display: none;">
+      <input type="text" id="customerName" placeholder="Your Name" required>
+      <input type="text" id="customerPhone" placeholder="Phone Number" required>
+      <textarea id="customerMessage" placeholder="Custom Message (e.g. Extra spicy, less oil)"></textarea>
+
+      <button class="btn btn-success order-btn" onclick="placeOrder()">Place Order Securely</button>
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
