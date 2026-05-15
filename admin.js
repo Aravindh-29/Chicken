@@ -1,124 +1,410 @@
+// ==================== CONFIGURATION ====================
 const API_URL = "https://script.google.com/macros/s/AKfycbyYHrROAMalP7l3GHBFfjTgGtB4tAMARWK-hui40ygxEzmdS7IszIXRMiXadPxpqwqU/exec";
+const ADMIN_PASSWORD = "chicken123";
+const AUTO_REFRESH_INTERVAL = 10000; // 10 seconds
 
-function showLoader(text = "Processing...") {
-  const loader = document.getElementById('loader');
-  document.getElementById('loaderText').innerText = text;
-  loader.classList.add('active');
-}
+// ==================== STATE MANAGEMENT ====================
+let allOrders = [];
+let filteredOrders = [];
+let isAuthenticated = false;
+let autoRefreshTimer = null;
 
-function hideLoader() {
-  document.getElementById('loader').classList.remove('active');
-}
+// ==================== INITIALIZATION ====================
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuthentication();
+});
 
-function verifyAdmin() {
-  const pass = document.getElementById('adminPassword').value;
-  if(pass === "chicken123") {
-    document.getElementById('authModal').classList.add('hidden');
-    document.getElementById('adminContent').style.display = 'block';
-    loadOrders();
-  } else {
-    document.getElementById('authError').style.display = 'block';
-  }
-}
-
-function getStatusBadge(status) {
-    const s = status.toLowerCase().replace(/ /g, '-');
-    return `<span class="badge ${s}">${status}</span>`;
-}
-
-async function loadOrders(isRefresh = false){
-  if(isRefresh) showLoader("Refreshing orders...");
-  else showLoader("Loading dashboard securely...");
-
-  try {
-    const response = await fetch(API_URL + "?action=getOrders&_=" + Date.now());
-    const data = await response.json();
-
-    let html = "";
+// ==================== AUTHENTICATION ====================
+function checkAuthentication() {
+    const stored = sessionStorage.getItem('adminAuth');
     
-    if (data.length === 0) {
-        html = `<p style="text-align:center; color:var(--text-muted);">No orders placed yet.</p>`;
+    if (stored === 'true') {
+        isAuthenticated = true;
+        showAdminPanel();
+        loadOrders();
+        startAutoRefresh();
+    } else {
+        document.getElementById('loginContainer').style.display = 'flex';
+        document.getElementById('adminContainer').style.display = 'none';
+    }
+}
+
+function handleLogin(event) {
+    event.preventDefault();
+    
+    const password = document.getElementById('passwordInput').value;
+    
+    if (password === ADMIN_PASSWORD) {
+        sessionStorage.setItem('adminAuth', 'true');
+        isAuthenticated = true;
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('adminContainer').style.display = 'block';
+        document.getElementById('passwordInput').value = '';
+        
+        showToast('Login successful!', 'success');
+        
+        loadOrders();
+        startAutoRefresh();
+    } else {
+        showToast('Incorrect password', 'error');
+        document.getElementById('passwordInput').value = '';
+    }
+}
+
+function handleLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+        sessionStorage.removeItem('adminAuth');
+        isAuthenticated = false;
+        clearAutoRefresh();
+        
+        document.getElementById('loginContainer').style.display = 'flex';
+        document.getElementById('adminContainer').style.display = 'none';
+        document.getElementById('passwordInput').value = '';
+        
+        // Clear all data
+        document.getElementById('ordersContainer').innerHTML = '';
+        document.getElementById('searchOrders').value = '';
+        document.getElementById('statusFilter').value = '';
+        
+        showToast('Logged out successfully', 'success');
+    }
+}
+
+function showAdminPanel() {
+    document.getElementById('loginContainer').style.display = 'none';
+    document.getElementById('adminContainer').style.display = 'block';
+}
+
+// ==================== LOAD ORDERS ====================
+async function loadOrders() {
+    try {
+        showLoading(true, 'Loading orders...');
+
+        const response = await fetch(`${API_URL}?action=getOrders`);
+        
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const data = await response.json();
+        
+        // Wait a moment for data to be ready
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        showLoading(false);
+        
+        if (!Array.isArray(data)) {
+            console.error('Invalid response format:', data);
+            showToast('Error loading orders', 'error');
+            return;
+        }
+
+        // Sort orders by time (newest first)
+        allOrders = data.sort((a, b) => {
+            const timeA = new Date(a.time || 0).getTime();
+            const timeB = new Date(b.time || 0).getTime();
+            return timeB - timeA;
+        });
+
+        filteredOrders = [...allOrders];
+        displayOrders();
+
+    } catch (error) {
+        console.error('Error:', error);
+        showLoading(false);
+        showToast('Error loading orders. Please try again.', 'error');
+    }
+}
+
+// ==================== DISPLAY ORDERS ====================
+function displayOrders() {
+    const container = document.getElementById('ordersContainer');
+    
+    if (filteredOrders.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 60px 20px; grid-column: 1/-1;">
+                <i class="fas fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 20px;"></i>
+                <p style="font-size: 18px; color: #666;">No orders found</p>
+                <p style="color: #999; margin-top: 10px;">Orders will appear here when customers place them</p>
+            </div>
+        `;
+        return;
     }
 
-    data.reverse().forEach(order => {
-      html += `
-      <div class='order-card glass' style="border-color: rgba(239, 68, 68, 0.2);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h3 style="margin:0;">${order.orderId}</h3>
-            ${getStatusBadge(order.status)}
-        </div>
+    container.innerHTML = filteredOrders.map(order => `
+        <div class="order-card" data-order-id="${order.orderId}">
+            <div class="order-card-header">
+                <div>
+                    <div class="order-card-id">${order.orderId}</div>
+                    <div class="order-card-time">${formatTime(order.time)}</div>
+                </div>
+                <span class="status-badge status-${getStatusClass(order.status)}">
+                    ${order.status}
+                </span>
+            </div>
 
-        <p><b>Name:</b> ${order.name}</p>
-        <p><b>Phone:</b> ${order.phone}</p>
-        <p><b>Items:</b> ${order.items}</p>
+            <div class="order-card-row">
+                <span class="order-card-label">Customer Name</span>
+                <span class="order-card-value">${escapeHtml(order.name)}</span>
+            </div>
+
+            <div class="order-card-row">
+                <span class="order-card-label">Phone</span>
+                <span class="order-card-value">
+                    <a href="tel:${order.phone}" style="color: var(--primary); text-decoration: none;">
+                        ${order.phone}
+                    </a>
+                </span>
+            </div>
+
+            <div class="order-card-row">
+                <span class="order-card-label">Items</span>
+                <span class="order-card-value">${escapeHtml(order.items)}</span>
+            </div>
+
+            <div class="order-card-row">
+                <span class="order-card-label">Total</span>
+                <span class="order-card-value">₹${order.total}</span>
+            </div>
+
+            ${order.message ? `
+                <div class="order-card-row">
+                    <span class="order-card-label">Message</span>
+                    <span class="order-card-value">${escapeHtml(order.message)}</span>
+                </div>
+            ` : ''}
+
+            ${order.status === 'Pending' ? `
+                <div class="delivery-info">
+                    <h4>Assign Delivery Partner</h4>
+                    <input type="text" id="boy${order.orderId}" placeholder="Delivery Boy Name" value="${order.deliveryBoy || ''}">
+                    <input type="tel" id="phone${order.orderId}" placeholder="Delivery Boy Phone" value="${order.deliveryPhone || ''}">
+                </div>
+            ` : ''}
+
+            ${order.deliveryBoy ? `
+                <div class="order-card-row">
+                    <span class="order-card-label">Delivery Partner</span>
+                    <span class="order-card-value">${escapeHtml(order.deliveryBoy)}</span>
+                </div>
+            ` : ''}
+
+            ${order.deliveryPhone ? `
+                <div class="order-card-row">
+                    <span class="order-card-label">Delivery Contact</span>
+                    <span class="order-card-value">
+                        <a href="tel:${order.deliveryPhone}" style="color: var(--primary); text-decoration: none;">
+                            ${order.deliveryPhone}
+                        </a>
+                    </span>
+                </div>
+            ` : ''}
+
+            <div class="order-actions">
+                ${order.status === 'Pending' ? `
+                    <button class="status-btn btn-accept" onclick="updateStatus('${order.orderId}','Accepted')">
+                        <i class="fas fa-check"></i> Accept
+                    </button>
+                ` : ''}
+                
+                ${['Pending', 'Accepted'].includes(order.status) ? `
+                    <button class="status-btn btn-preparing" onclick="updateStatus('${order.orderId}','Preparing')">
+                        <i class="fas fa-utensils"></i> Preparing
+                    </button>
+                ` : ''}
+                
+                ${['Preparing', 'Accepted'].includes(order.status) ? `
+                    <button class="status-btn btn-out" onclick="outForDelivery('${order.orderId}')">
+                        <i class="fas fa-truck"></i> Out For Delivery
+                    </button>
+                ` : ''}
+                
+                ${order.status !== 'Delivered' && order.status !== 'Cancelled' ? `
+                    <button class="status-btn btn-delivered" onclick="updateStatus('${order.orderId}','Delivered')">
+                        <i class="fas fa-check-double"></i> Delivered
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+// ==================== UPDATE ORDER STATUS ====================
+async function updateStatus(orderId, status) {
+    try {
+        showLoading(true, `Updating status to ${status}...`);
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'updateStatus',
+                orderId,
+                status
+            })
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        <div style="display: flex; gap: 10px; margin-top: 15px;">
-            <input type='text' id='boy${order.orderId}' placeholder='Delivery Partner Name' value='${order.deliveryBoy || ""}'>
-            <input type='text' id='phone${order.orderId}' placeholder='Delivery Partner Phone' value='${order.deliveryPhone || ""}'>
-        </div>
+        showLoading(false);
+        showToast(`Order status updated to ${status}`, 'success');
+        
+        await loadOrders();
 
-        <div class="order-actions" style="margin-top: 20px;">
-            <button class="btn btn-success" onclick="updateStatus('${order.orderId}','Accepted')">Accept</button>
-            <button class="btn" style="background:var(--bg-color)" onclick="updateStatus('${order.orderId}','Preparing')">Preparing</button>
-            <button class="btn" style="background:#f97316" onclick="outForDelivery('${order.orderId}')">Out For Delivery</button>
-            <button class="btn" style="background:#22c55e" onclick="updateStatus('${order.orderId}','Delivered')">Delivered</button>
-        </div>
-      </div>
-      `;
-    });
-
-    document.getElementById("orders").innerHTML = html;
-  } catch(error) {
-    console.error(error);
-    alert("Failed to fetch orders.");
-  } finally {
-    hideLoader();
-  }
+    } catch (error) {
+        console.error('Error:', error);
+        showLoading(false);
+        showToast('Error updating order status', 'error');
+    }
 }
 
-async function updateStatus(orderId, status){
-  showLoader(`Updating to '${status}'...`);
-  try {
-    await fetch(API_URL, {
-      method:"POST",
-      mode: "no-cors",
-      body:JSON.stringify({
-        action:"updateStatus",
-        orderId,
-        status
-      })
-    });
-    await loadOrders();
-  } catch(err) {
-    alert("Failed to update status.");
-    hideLoader();
-  }
+// ==================== OUT FOR DELIVERY ====================
+async function outForDelivery(orderId) {
+    const deliveryBoy = document.getElementById('boy' + orderId).value.trim();
+    const deliveryPhone = document.getElementById('phone' + orderId).value.trim();
+
+    if (!deliveryBoy || !deliveryPhone) {
+        showToast('Please enter delivery boy name and phone', 'error');
+        return;
+    }
+
+    if (!/^[0-9]{10}$/.test(deliveryPhone.replace(/\D/g, ''))) {
+        showToast('Please enter a valid 10-digit phone number', 'error');
+        return;
+    }
+
+    try {
+        showLoading(true, 'Assigning delivery...');
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'outForDelivery',
+                orderId,
+                deliveryBoy,
+                deliveryPhone
+            })
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        showLoading(false);
+        showToast('Order assigned for delivery', 'success');
+        
+        await loadOrders();
+
+    } catch (error) {
+        console.error('Error:', error);
+        showLoading(false);
+        showToast('Error assigning delivery', 'error');
+    }
 }
 
-async function outForDelivery(orderId){
-  const deliveryBoy = document.getElementById("boy" + orderId).value.trim();
-  const deliveryPhone = document.getElementById("phone" + orderId).value.trim();
+// ==================== FILTER & SEARCH ====================
+function filterOrders() {
+    const searchTerm = document.getElementById('searchOrders').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
 
-  if(!deliveryBoy || !deliveryPhone) {
-      alert("Please provide the delivery partner's name and phone number before assigning.");
-      return;
-  }
+    filteredOrders = allOrders.filter(order => {
+        const matchesSearch = !searchTerm || 
+            order.orderId.toLowerCase().includes(searchTerm) ||
+            order.phone.includes(searchTerm) ||
+            order.name.toLowerCase().includes(searchTerm);
+        
+        const matchesStatus = !statusFilter || order.status === statusFilter;
 
-  showLoader("Assigning delivery partner...");
-  try {
-    await fetch(API_URL, {
-      method:"POST",
-      mode: "no-cors",
-      body:JSON.stringify({
-        action:"outForDelivery",
-        orderId,
-        deliveryBoy,
-        deliveryPhone
-      })
+        return matchesSearch && matchesStatus;
     });
-    await loadOrders();
-  } catch(err) {
-    alert("Failed to assign delivery.");
-    hideLoader();
-  }
+
+    displayOrders();
 }
+
+// ==================== AUTO REFRESH ====================
+function startAutoRefresh() {
+    autoRefreshTimer = setInterval(async () => {
+        if (isAuthenticated) {
+            await loadOrders();
+        }
+    }, AUTO_REFRESH_INTERVAL);
+}
+
+function clearAutoRefresh() {
+    if (autoRefreshTimer) {
+        clearInterval(autoRefreshTimer);
+        autoRefreshTimer = null;
+    }
+}
+
+// ==================== UTILITY FUNCTIONS ====================
+function getStatusClass(status) {
+    const statusMap = {
+        'Pending': 'pending',
+        'Accepted': 'accepted',
+        'Preparing': 'preparing',
+        'Out For Delivery': 'out',
+        'Delivered': 'delivered',
+        'Cancelled': 'cancelled'
+    };
+    return statusMap[status] || 'pending';
+}
+
+function formatTime(dateString) {
+    if (!dateString) return 'N/A';
+    
+    try {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+
+        return date.toLocaleDateString('en-IN', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (e) {
+        return 'N/A';
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showLoading(show, message = 'Processing...') {
+    const overlay = document.getElementById('loadingOverlay');
+    const text = overlay.querySelector('p');
+    
+    if (show) {
+        overlay.classList.add('active');
+        text.textContent = message;
+    } else {
+        overlay.classList.remove('active');
+    }
+}
+
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast active ${type}`;
+    
+    setTimeout(() => {
+        toast.classList.remove('active');
+    }, 3000);
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    clearAutoRefresh();
+});

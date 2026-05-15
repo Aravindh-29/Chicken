@@ -1,49 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard | Aravindh Chicken Shop</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Admin Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-
-  <!-- Loading Overlay -->
-  <div id="loader" class="loader-overlay">
-    <div class="spinner"></div>
-    <div id="loaderText" class="loader-text">Loading Dashboard...</div>
-  </div>
-
-  <!-- Password Modal -->
-  <div id="authModal" class="modal">
-    <div class="modal-content glass" style="padding: 30px;">
-      <h2 style="color:var(--primary); margin-bottom:15px;">Admin Login</h2>
-      <p style="color:var(--text-muted); margin-bottom:20px;">Please enter the designated admin password to proceed.</p>
-      <input type="password" id="adminPassword" placeholder="Admin Password">
-      <p id="authError" style="color:var(--primary); font-size:0.9rem; margin-top:10px; display:none;">Incorrect Password</p>
-      <button class="btn btn-success" style="width:100%; margin-top:20px;" onclick="verifyAdmin()">Login</button>
-    </div>
-  </div>
-
-  <div id="adminContent" style="display: none;">
-    <header>
-      <h1>👨‍🍳 Kitchen Dashboard</h1>
-      <p>Manage and process all incoming orders</p>
-    </header>
-
-    <div class="top-links">
-      <button class="btn" style="background:var(--bg-color); border: 1px solid var(--panel-border);" onclick="loadOrders(true)">🔄 Refresh Orders</button>
-      <a href="index.html" class="btn">🏠 Back to Shop</a>
+    <!-- Login Section (initially shown) -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-lock"></i>
+                <h1>Admin Access</h1>
+            </div>
+            <form onsubmit="handleLogin(event)">
+                <input type="password" id="passwordInput" placeholder="Enter Admin Password" required>
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+            <p class="login-hint">Enter the admin password to access the dashboard</p>
+        </div>
     </div>
 
-    <section class="container glass" style="max-width: 1000px;">
-      <h2>🛎️ Live Orders</h2>
-      <div id="orders">
-        <!-- Dynamic order cards injected here -->
-      </div>
-    </section>
-  </div>
+    <!-- Admin Dashboard (hidden until login) -->
+    <div class="admin-container" id="adminContainer" style="display: none;">
+        <!-- Navigation Bar -->
+        <nav class="admin-navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <i class="fas fa-drumstick-bite"></i>
+                    <span>Aravindh Chicken - Admin</span>
+                </div>
+                <div class="nav-links">
+                    <button class="logout-btn" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </nav>
 
-  <script src="admin.js"></script>
+        <!-- Admin Content -->
+        <section class="admin-section">
+            <div class="container">
+                <div class="section-header">
+                    <h1>📊 Order Management</h1>
+                    <p>View and manage all customer orders</p>
+                </div>
+
+                <!-- Filter & Search -->
+                <div class="admin-controls">
+                    <input type="text" id="searchOrders" placeholder="Search by Order ID or Phone..." onkeyup="filterOrders()">
+                    <select id="statusFilter" onchange="filterOrders()">
+                        <option value="">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Accepted">Accepted</option>
+                        <option value="Preparing">Preparing</option>
+                        <option value="Out For Delivery">Out For Delivery</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <!-- Orders List -->
+                <div class="orders-container" id="ordersContainer">
+                    <!-- Orders loaded dynamically -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 Aravindh Chicken Shop Admin Panel</p>
+    </footer>
+
+    <script src="admin.js"></script>
 </body>
 </html>

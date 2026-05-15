@@ -1,39 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Track Order | Aravindh Chicken Shop</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 Track Your Order</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-drumstick-bite"></i>
+                <span>Aravindh Chicken</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+        </div>
+    </nav>
 
-  <!-- Loading Overlay -->
-  <div id="loader" class="loader-overlay">
-    <div class="spinner"></div>
-    <div id="loaderText" class="loader-text">Fetching data...</div>
-  </div>
+    <!-- Track Section -->
+    <section class="track-section">
+        <div class="container">
+            <div class="track-card">
+                <div class="section-header">
+                    <h1>📦 Track Your Order</h1>
+                    <p>Enter your phone number to track your order in real-time</p>
+                </div>
 
-  <header>
-    <h1>📦 Track Your Order</h1>
-    <p>Enter your phone number to see the status</p>
-  </header>
-  
-  <div class="top-links">
-    <a href="index.html" class="btn btn-success">⬅ Back to Menu</a>
-  </div>
+                <form class="track-form" onsubmit="handleTrack(event)">
+                    <div class="input-group">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="trackPhone" placeholder="Enter Phone Number" required>
+                    </div>
+                    <button type="submit" class="track-btn">
+                        <i class="fas fa-search"></i> Track Order
+                    </button>
+                </form>
 
-  <section class="container glass">
-    <div style="display: flex; gap: 10px;">
-      <input type="text" id="trackPhone" placeholder="Enter Registration Phone Number" style="margin-top: 0;">
-      <button class="btn" style="margin: 0; white-space: nowrap;" onclick="trackOrder()">Track</button>
+                <div id="trackResult" class="track-result"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Tracking your order...</p>
     </div>
 
-    <div id="result" style="margin-top: 30px;">
-      <!-- Results will populate here -->
-    </div>
-  </section>
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
 
-  <script src="track.js"></script>
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 Aravindh Chicken Shop. All rights reserved.</p>
+    </footer>
+
+    <script src="track.js"></script>
 </body>
 </html>
