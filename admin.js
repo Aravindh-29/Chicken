@@ -1,4 +1,3 @@
-
 // ==================== CONFIGURATION ====================
 const API_URL = "https://script.google.com/macros/s/AKfycbyYHrROAMalP7l3GHBFfjTgGtB4tAMARWK-hui40ygxEzmdS7IszIXRMiXadPxpqwqU/exec";
 const ADMIN_PASSWORD = "chicken123";
