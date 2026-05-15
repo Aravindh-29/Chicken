@@ -1404,3 +1404,101 @@ body {
         font-size: 12px;
     }
 }
+
+
+/* ==================== MOBILE & ADMIN FIXES ==================== */
+
+.refresh-btn {
+    background: #25D366;
+    color: #fff;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.admin-top-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-cancel {
+    background: #d62828;
+    color: white;
+}
+
+.loading-overlay {
+    display: none;
+}
+
+.loading-overlay.active {
+    display: flex !important;
+}
+
+@media (max-width: 768px) {
+
+    body {
+        overflow-x: hidden;
+    }
+
+    .nav-container,
+    .nav-links {
+        flex-direction: column;
+        height: auto;
+        gap: 10px;
+        padding: 10px 0;
+    }
+
+    .orders-container {
+        grid-template-columns: 1fr !important;
+    }
+
+    .order-actions {
+        flex-direction: column;
+    }
+
+    .status-btn,
+    .action-btn,
+    .checkout-btn,
+    .track-btn,
+    .login-btn,
+    .refresh-btn {
+        width: 100%;
+    }
+
+    .cart-sidebar {
+        width: 100% !important;
+    }
+
+    .hero-animation {
+        display: none;
+    }
+
+    .track-card,
+    .login-card {
+        padding: 20px !important;
+    }
+
+    .admin-controls {
+        flex-direction: column;
+    }
+
+    .admin-controls input,
+    .admin-controls select {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .order-card-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .products-grid,
+    .about-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

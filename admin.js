@@ -1,7 +1,7 @@
 // ==================== CONFIGURATION ====================
 const API_URL = "https://script.google.com/macros/s/AKfycbyYHrROAMalP7l3GHBFfjTgGtB4tAMARWK-hui40ygxEzmdS7IszIXRMiXadPxpqwqU/exec";
 const ADMIN_PASSWORD = "chicken123";
-const AUTO_REFRESH_INTERVAL = 10000; // 10 seconds
+const AUTO_REFRESH_INTERVAL = 0; // Auto refresh disabled
 
 // ==================== STATE MANAGEMENT ====================
 let allOrders = [];
@@ -22,7 +22,7 @@ function checkAuthentication() {
         isAuthenticated = true;
         showAdminPanel();
         loadOrders();
-        startAutoRefresh();
+        // Auto refresh disabled
     } else {
         document.getElementById('loginContainer').style.display = 'flex';
         document.getElementById('adminContainer').style.display = 'none';
@@ -44,7 +44,7 @@ function handleLogin(event) {
         showToast('Login successful!', 'success');
         
         loadOrders();
-        startAutoRefresh();
+        // Auto refresh disabled
     } else {
         showToast('Incorrect password', 'error');
         document.getElementById('passwordInput').value = '';
@@ -220,6 +220,12 @@ function displayOrders() {
                 ${order.status !== 'Delivered' && order.status !== 'Cancelled' ? `
                     <button class="status-btn btn-delivered" onclick="updateStatus('${order.orderId}','Delivered')">
                         <i class="fas fa-check-double"></i> Delivered
+                    </button>
+                ` : ''}
+
+                ${order.status !== 'Cancelled' && order.status !== 'Delivered' ? `
+                    <button class="status-btn btn-cancel" onclick="updateStatus('${order.orderId}','Cancelled')">
+                        <i class="fas fa-ban"></i> Cancel
                     </button>
                 ` : ''}
             </div>
@@ -408,3 +414,10 @@ function showToast(message, type = 'success') {
 window.addEventListener('beforeunload', () => {
     clearAutoRefresh();
 });
+
+
+// ==================== MANUAL REFRESH ====================
+async function manualRefresh() {
+    showToast('Refreshing orders...', 'success');
+    await loadOrders();
+}
