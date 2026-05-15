@@ -1,143 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍗 Aravindh Chicken Shop - Premium Starters</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🍗 Aravindh Chicken – Premium Starters</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <i class="fas fa-drumstick-bite"></i>
-                <span>Aravindh Chicken</span>
-            </div>
-            <div class="nav-links">
-                <a href="#products" class="nav-link">Menu</a>
-                <a href="#about" class="nav-link">About</a>
-                <a href="track.html" class="nav-link track-btn">
-                    <i class="fas fa-tracking"></i> Track Order
-                </a>
-                <button class="cart-icon" onclick="toggleCart()">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count" id="cartCount">0</span>
-                </button>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Crispy. Fresh. Delicious.</h1>
-            <p>Premium Chicken Starters Delivered to Your Door</p>
-            <button class="cta-btn" onclick="scrollToProducts()">Order Now</button>
-        </div>
-        <div class="hero-animation">
-            <div class="floating-chicken">🍗</div>
-        </div>
-    </section>
-
-    <!-- Products Section -->
-    <section class="products" id="products">
-        <div class="container">
-            <div class="section-header">
-                <h2>Our Signature Menu</h2>
-                <p>Handpicked recipes for ultimate taste</p>
-            </div>
-            <div class="products-grid" id="productsGrid">
-                <!-- Products loaded dynamically -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Cart Sidebar -->
-    <div class="cart-sidebar" id="cartSidebar">
-        <div class="cart-header">
-            <h2>Your Order</h2>
-            <button class="close-btn" onclick="toggleCart()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <div class="cart-content">
-            <div class="cart-items" id="cartItems">
-                <p class="empty-cart">Your cart is empty</p>
-            </div>
-            
-            <div class="cart-summary" id="cartSummary" style="display: none;">
-                <div class="summary-item">
-                    <span>Subtotal:</span>
-                    <span id="subtotal">₹0</span>
-                </div>
-                <div class="summary-item">
-                    <span>Delivery:</span>
-                    <span id="delivery">Free</span>
-                </div>
-                <div class="summary-item total">
-                    <span>Total:</span>
-                    <span id="total">₹0</span>
-                </div>
-            </div>
-        </div>
-
-        <form class="checkout-form" id="checkoutForm" style="display: none;">
-            <input type="text" id="customerName" placeholder="Your Name" required>
-            <input type="tel" id="customerPhone" placeholder="Phone Number" required>
-            <textarea id="customerMessage" placeholder="Special Instructions (Optional)"></textarea>
-            <button type="button" class="checkout-btn" onclick="placeOrder()">
-                <i class="fas fa-check-circle"></i> Place Order
-            </button>
-        </form>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a class="logo" href="#">
+        <i class="fas fa-drumstick-bite"></i>
+        <span>Aravindh <em>Chicken</em></span>
+      </a>
+      <div class="nav-links">
+        <a href="#products" class="nav-link"><i class="fas fa-utensils"></i> <span>Menu</span></a>
+        <a href="#about" class="nav-link"><i class="fas fa-star"></i> <span>About</span></a>
+        <a href="track.html" class="nav-link track-btn">
+          <i class="fas fa-location-arrow"></i> <span>Track Order</span>
+        </a>
+        <button class="cart-icon" onclick="toggleCart()" aria-label="Cart">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+      </div>
     </div>
+  </nav>
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <p id="loadingText">Processing...</p>
-    </div>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
 
-    <!-- Toast Notification -->
-    <div class="toast" id="toast"></div>
-
-    <!-- About Section -->
-    <section class="about" id="about">
-        <div class="container">
-            <h2>Why Choose Us?</h2>
-            <div class="about-grid">
-                <div class="about-card">
-                    <i class="fas fa-fire"></i>
-                    <h3>Fresh & Hot</h3>
-                    <p>Prepared fresh and delivered hot to your doorstep</p>
-                </div>
-                <div class="about-card">
-                    <i class="fas fa-leaf"></i>
-                    <h3>Quality Ingredients</h3>
-                    <p>We use only premium, hand-selected chicken</p>
-                </div>
-                <div class="about-card">
-                    <i class="fas fa-bolt"></i>
-                    <h3>Fast Delivery</h3>
-                    <p>Quick delivery with professional delivery partners</p>
-                </div>
-                <div class="about-card">
-                    <i class="fas fa-smile"></i>
-                    <h3>Customer Care</h3>
-                    <p>24/7 support for all your queries</p>
-                </div>
-            </div>
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-tag">
+          <span>🔴</span> Now Taking Orders
         </div>
-    </section>
+        <h1>
+          Seriously<br>
+          <span class="highlight">Addictive</span><br>
+          Chicken
+        </h1>
+        <p>Premium chicken starters cooked fresh to order. Bold spices, crispy textures — delivered hot to your door.</p>
+        <div class="hero-btns">
+          <button class="cta-btn" onclick="scrollToProducts()">
+            <i class="fas fa-fire"></i> Order Now
+          </button>
+          <a href="track.html" class="cta-secondary">Track My Order</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-num">5★</div>
+            <div class="stat-label">Avg Rating</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">500+</div>
+            <div class="stat-label">Happy Customers</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">30min</div>
+            <div class="stat-label">Avg Delivery</div>
+          </div>
+        </div>
+      </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <p>&copy; 2024 Aravindh Chicken Shop. All rights reserved.</p>
-        <p>Fresh Starters Delivered Daily</p>
-    </footer>
+      <div class="hero-visual">
+        <div class="hero-plate">
+          <div class="plate-ring"></div>
+          <div class="plate-ring"></div>
+          <div class="plate-ring"></div>
+          <div class="plate-center">
+            <span class="plate-emoji">🍗</span>
+          </div>
+        </div>
+        <div class="floating-badge badge-1">
+          <span class="fb-icon">🌶️</span>
+          <div>
+            <div style="font-size:11px;color:var(--text-dim)">Spice Level</div>
+            <div>Extra Hot!</div>
+          </div>
+        </div>
+        <div class="floating-badge badge-2">
+          <span class="fb-icon">⚡</span>
+          <div>
+            <div style="font-size:11px;color:var(--text-dim)">Cooked Fresh</div>
+            <div>Every Order</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <script src="app.js"></script>
+  <!-- Products Section -->
+  <section class="products" id="products">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">Our Menu</div>
+        <h2>Signature Starters</h2>
+        <p>Handcrafted recipes perfected over years — each bite tells a story.</p>
+      </div>
+      <div class="products-grid" id="productsGrid">
+        <!-- Loaded dynamically -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h2>🛒 Your Order</h2>
+      <button class="close-btn" onclick="toggleCart()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="cart-content">
+      <div class="cart-items" id="cartItems">
+        <p class="empty-cart">Your cart is empty</p>
+      </div>
+      <div class="cart-summary" id="cartSummary" style="display:none;">
+        <div class="summary-item"><span>Subtotal</span><span id="subtotal">₹0</span></div>
+        <div class="summary-item"><span>Delivery</span><span id="delivery">Free</span></div>
+        <div class="summary-item total"><span>Total</span><span id="total">₹0</span></div>
+      </div>
+    </div>
+    <form class="checkout-form" id="checkoutForm" style="display:none;">
+      <input type="text" id="customerName" placeholder="Your Full Name" required>
+      <input type="tel" id="customerPhone" placeholder="Phone Number (10 digits)" required>
+      <textarea id="customerMessage" placeholder="Special Instructions (Optional)"></textarea>
+      <button type="button" class="checkout-btn" onclick="placeOrder()">
+        <i class="fas fa-check-circle"></i> Place Order
+      </button>
+    </form>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Processing...</p>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- About Section -->
+  <section class="about" id="about">
+    <div class="container">
+      <h2>Why Aravindh Chicken?</h2>
+      <div class="about-grid">
+        <div class="about-card">
+          <i class="fas fa-fire"></i>
+          <h3>Fresh & Hot</h3>
+          <p>Prepared fresh on every order and delivered piping hot to your doorstep. Never pre-cooked.</p>
+        </div>
+        <div class="about-card">
+          <i class="fas fa-leaf"></i>
+          <h3>Premium Ingredients</h3>
+          <p>Hand-selected chicken with carefully sourced aromatic spices for authentic flavour.</p>
+        </div>
+        <div class="about-card">
+          <i class="fas fa-bolt"></i>
+          <h3>Fast Delivery</h3>
+          <p>30-minute average delivery time with real-time tracking at every step.</p>
+        </div>
+        <div class="about-card">
+          <i class="fas fa-heart"></i>
+          <h3>Made with Love</h3>
+          <p>Family recipes passed down generations — every plate is cooked with care and passion.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>🍗 <strong>Aravindh Chicken Shop</strong> — Premium Starters Delivered Daily</p>
+    <p>&copy; 2024 All rights reserved.</p>
+  </footer>
+
+  <script src="app.js"></script>
 </body>
 </html>

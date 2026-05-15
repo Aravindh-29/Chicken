@@ -16,144 +16,109 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ==================== AUTHENTICATION ====================
 function checkAuthentication() {
-
     const stored = sessionStorage.getItem('adminAuth');
-
+    
     if (stored === 'true') {
-
         isAuthenticated = true;
-
         showAdminPanel();
-
         loadOrders();
-
+        // Auto refresh disabled
     } else {
-
         document.getElementById('loginContainer').style.display = 'flex';
-
         document.getElementById('adminContainer').style.display = 'none';
     }
 }
 
 function handleLogin(event) {
-
     event.preventDefault();
-
+    
     const password = document.getElementById('passwordInput').value;
-
+    
     if (password === ADMIN_PASSWORD) {
-
         sessionStorage.setItem('adminAuth', 'true');
-
         isAuthenticated = true;
-
         document.getElementById('loginContainer').style.display = 'none';
-
         document.getElementById('adminContainer').style.display = 'block';
-
         document.getElementById('passwordInput').value = '';
-
+        
         showToast('Login successful!', 'success');
-
+        
         loadOrders();
-
+        // Auto refresh disabled
     } else {
-
         showToast('Incorrect password', 'error');
-
         document.getElementById('passwordInput').value = '';
     }
 }
 
 function handleLogout() {
-
     if (confirm('Are you sure you want to logout?')) {
-
         sessionStorage.removeItem('adminAuth');
-
         isAuthenticated = false;
-
         clearAutoRefresh();
-
+        
         document.getElementById('loginContainer').style.display = 'flex';
-
         document.getElementById('adminContainer').style.display = 'none';
-
         document.getElementById('passwordInput').value = '';
-
+        
+        // Clear all data
         document.getElementById('ordersContainer').innerHTML = '';
-
         document.getElementById('searchOrders').value = '';
-
         document.getElementById('statusFilter').value = '';
-
+        
         showToast('Logged out successfully', 'success');
     }
 }
 
 function showAdminPanel() {
-
     document.getElementById('loginContainer').style.display = 'none';
-
     document.getElementById('adminContainer').style.display = 'block';
 }
 
 // ==================== LOAD ORDERS ====================
 async function loadOrders() {
-
     try {
-
         showLoading(true, 'Loading orders...');
 
         const response = await fetch(`${API_URL}?action=getOrders`);
-
+        
         if (!response.ok) throw new Error('Network response was not ok');
-
+        
         const data = await response.json();
-
+        
+        // Wait a moment for data to be ready
         await new Promise(resolve => setTimeout(resolve, 500));
-
+        
         showLoading(false);
-
+        
         if (!Array.isArray(data)) {
-
             console.error('Invalid response format:', data);
-
             showToast('Error loading orders', 'error');
-
             return;
         }
 
+        // Sort orders by time (newest first)
         allOrders = data.sort((a, b) => {
-
             const timeA = new Date(a.time || 0).getTime();
-
             const timeB = new Date(b.time || 0).getTime();
-
             return timeB - timeA;
         });
 
         filteredOrders = [...allOrders];
-
         displayOrders();
 
     } catch (error) {
-
         console.error('Error:', error);
-
         showLoading(false);
-
         showToast('Error loading orders. Please try again.', 'error');
     }
 }
 
 // ==================== DISPLAY ORDERS ====================
 function displayOrders() {
-
     const container = document.getElementById('ordersContainer');
-
+    
     if (filteredOrders.length === 0) {
-
         container.innerHTML = `
             <div style="text-align: center; padding: 60px 20px; grid-column: 1/-1;">
                 <i class="fas fa-inbox" style="font-size: 48px; color: #ccc; margin-bottom: 20px;"></i>
@@ -161,25 +126,19 @@ function displayOrders() {
                 <p style="color: #999; margin-top: 10px;">Orders will appear here when customers place them</p>
             </div>
         `;
-
         return;
     }
 
     container.innerHTML = filteredOrders.map(order => `
-
         <div class="order-card" data-order-id="${order.orderId}">
-
             <div class="order-card-header">
-
                 <div>
                     <div class="order-card-id">${order.orderId}</div>
                     <div class="order-card-time">${formatTime(order.time)}</div>
                 </div>
-
                 <span class="status-badge status-${getStatusClass(order.status)}">
                     ${order.status}
                 </span>
-
             </div>
 
             <div class="order-card-row">
@@ -213,25 +172,11 @@ function displayOrders() {
                 </div>
             ` : ''}
 
-            ${order.status !== 'Delivered' && order.status !== 'Cancelled' ? `
+            ${order.status === 'Pending' ? `
                 <div class="delivery-info">
-
                     <h4>Assign Delivery Partner</h4>
-
-                    <input
-                        type="text"
-                        data-boy="${order.orderId}"
-                        placeholder="Delivery Boy Name"
-                        value="${order.deliveryBoy || ''}"
-                    >
-
-                    <input
-                        type="tel"
-                        data-phone="${order.orderId}"
-                        placeholder="Delivery Boy Phone"
-                        value="${order.deliveryPhone || ''}"
-                    >
-
+                    <input type="text" id="boy${order.orderId}" placeholder="Delivery Boy Name" value="${order.deliveryBoy || ''}">
+                    <input type="tel" id="phone${order.orderId}" placeholder="Delivery Boy Phone" value="${order.deliveryPhone || ''}">
                 </div>
             ` : ''}
 
@@ -254,54 +199,43 @@ function displayOrders() {
             ` : ''}
 
             <div class="order-actions">
-
                 ${order.status === 'Pending' ? `
-                    <button class="status-btn btn-accept"
-                        onclick="updateStatus('${order.orderId}','Accepted')">
+                    <button class="status-btn btn-accept" onclick="updateStatus('${order.orderId}','Accepted')">
                         <i class="fas fa-check"></i> Accept
                     </button>
                 ` : ''}
-
+                
                 ${['Pending', 'Accepted'].includes(order.status) ? `
-                    <button class="status-btn btn-preparing"
-                        onclick="updateStatus('${order.orderId}','Preparing')">
+                    <button class="status-btn btn-preparing" onclick="updateStatus('${order.orderId}','Preparing')">
                         <i class="fas fa-utensils"></i> Preparing
                     </button>
                 ` : ''}
-
+                
                 ${['Preparing', 'Accepted'].includes(order.status) ? `
-                    <button class="status-btn btn-out"
-                        onclick="outForDelivery('${order.orderId}')">
+                    <button class="status-btn btn-out" onclick="outForDelivery('${order.orderId}')">
                         <i class="fas fa-truck"></i> Out For Delivery
                     </button>
                 ` : ''}
-
+                
                 ${order.status !== 'Delivered' && order.status !== 'Cancelled' ? `
-                    <button class="status-btn btn-delivered"
-                        onclick="updateStatus('${order.orderId}','Delivered')">
+                    <button class="status-btn btn-delivered" onclick="updateStatus('${order.orderId}','Delivered')">
                         <i class="fas fa-check-double"></i> Delivered
                     </button>
                 ` : ''}
 
                 ${order.status !== 'Cancelled' && order.status !== 'Delivered' ? `
-                    <button class="status-btn btn-cancel"
-                        onclick="updateStatus('${order.orderId}','Cancelled')">
+                    <button class="status-btn btn-cancel" onclick="updateStatus('${order.orderId}','Cancelled')">
                         <i class="fas fa-ban"></i> Cancel
                     </button>
                 ` : ''}
-
             </div>
-
         </div>
-
     `).join('');
 }
 
 // ==================== UPDATE ORDER STATUS ====================
 async function updateStatus(orderId, status) {
-
     try {
-
         showLoading(true, `Updating status to ${status}...`);
 
         const response = await fetch(API_URL, {
@@ -316,57 +250,35 @@ async function updateStatus(orderId, status) {
         if (!response.ok) throw new Error('Network response was not ok');
 
         await new Promise(resolve => setTimeout(resolve, 1000));
-
+        
         showLoading(false);
-
         showToast(`Order status updated to ${status}`, 'success');
-
+        
         await loadOrders();
 
     } catch (error) {
-
         console.error('Error:', error);
-
         showLoading(false);
-
         showToast('Error updating order status', 'error');
     }
 }
 
 // ==================== OUT FOR DELIVERY ====================
 async function outForDelivery(orderId) {
-
-    const boyInput = document.querySelector(`[data-boy="${orderId}"]`);
-
-    const phoneInput = document.querySelector(`[data-phone="${orderId}"]`);
-
-    if (!boyInput || !phoneInput) {
-
-        showToast('Delivery input fields not found', 'error');
-
-        return;
-    }
-
-    const deliveryBoy = boyInput.value.trim();
-
-    const deliveryPhone = phoneInput.value.trim();
+    const deliveryBoy = document.getElementById('boy' + orderId).value.trim();
+    const deliveryPhone = document.getElementById('phone' + orderId).value.trim();
 
     if (!deliveryBoy || !deliveryPhone) {
-
         showToast('Please enter delivery boy name and phone', 'error');
-
         return;
     }
 
-    if (!/^[0-9]{10}$/.test(deliveryPhone)) {
-
-        showToast('Please enter valid 10-digit phone number', 'error');
-
+    if (!/^[0-9]{10}$/.test(deliveryPhone.replace(/\D/g, ''))) {
+        showToast('Please enter a valid 10-digit phone number', 'error');
         return;
     }
 
     try {
-
         showLoading(true, 'Assigning delivery...');
 
         const response = await fetch(API_URL, {
@@ -382,41 +294,31 @@ async function outForDelivery(orderId) {
         if (!response.ok) throw new Error('Network response was not ok');
 
         await new Promise(resolve => setTimeout(resolve, 1000));
-
+        
         showLoading(false);
-
         showToast('Order assigned for delivery', 'success');
-
+        
         await loadOrders();
 
     } catch (error) {
-
-        console.error(error);
-
+        console.error('Error:', error);
         showLoading(false);
-
         showToast('Error assigning delivery', 'error');
     }
 }
 
 // ==================== FILTER & SEARCH ====================
 function filterOrders() {
-
     const searchTerm = document.getElementById('searchOrders').value.toLowerCase();
-
     const statusFilter = document.getElementById('statusFilter').value;
 
     filteredOrders = allOrders.filter(order => {
-
-        const matchesSearch =
-            !searchTerm ||
+        const matchesSearch = !searchTerm || 
             order.orderId.toLowerCase().includes(searchTerm) ||
             order.phone.includes(searchTerm) ||
             order.name.toLowerCase().includes(searchTerm);
-
-        const matchesStatus =
-            !statusFilter ||
-            order.status === statusFilter;
+        
+        const matchesStatus = !statusFilter || order.status === statusFilter;
 
         return matchesSearch && matchesStatus;
     });
@@ -426,30 +328,22 @@ function filterOrders() {
 
 // ==================== AUTO REFRESH ====================
 function startAutoRefresh() {
-
     autoRefreshTimer = setInterval(async () => {
-
         if (isAuthenticated) {
-
             await loadOrders();
         }
-
     }, AUTO_REFRESH_INTERVAL);
 }
 
 function clearAutoRefresh() {
-
     if (autoRefreshTimer) {
-
         clearInterval(autoRefreshTimer);
-
         autoRefreshTimer = null;
     }
 }
 
 // ==================== UTILITY FUNCTIONS ====================
 function getStatusClass(status) {
-
     const statusMap = {
         'Pending': 'pending',
         'Accepted': 'accepted',
@@ -458,78 +352,72 @@ function getStatusClass(status) {
         'Delivered': 'delivered',
         'Cancelled': 'cancelled'
     };
-
     return statusMap[status] || 'pending';
 }
 
 function formatTime(dateString) {
-
     if (!dateString) return 'N/A';
-
+    
     try {
-
         const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
 
-        return date.toLocaleString('en-IN');
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
 
+        return date.toLocaleDateString('en-IN', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     } catch (e) {
-
         return 'N/A';
     }
 }
 
 function escapeHtml(text) {
-
     const div = document.createElement('div');
-
     div.textContent = text;
-
     return div.innerHTML;
 }
 
 function showLoading(show, message = 'Processing...') {
-
     const overlay = document.getElementById('loadingOverlay');
-
     const text = overlay.querySelector('p');
-
+    
     if (show) {
-
         overlay.classList.add('active');
-
         text.textContent = message;
-
     } else {
-
         overlay.classList.remove('active');
     }
 }
 
 function showToast(message, type = 'success') {
-
     const toast = document.getElementById('toast');
-
     toast.textContent = message;
-
     toast.className = `toast active ${type}`;
-
+    
     setTimeout(() => {
-
         toast.classList.remove('active');
-
     }, 3000);
 }
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {
-
     clearAutoRefresh();
 });
 
+
 // ==================== MANUAL REFRESH ====================
 async function manualRefresh() {
-
     showToast('Refreshing orders...', 'success');
-
     await loadOrders();
 }

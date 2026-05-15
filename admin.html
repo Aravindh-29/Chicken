@@ -1,98 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔐 Admin Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔐 Admin Dashboard – Aravindh Chicken</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Login Section (initially shown) -->
-    <div class="login-container" id="loginContainer">
-        <div class="login-card">
-            <div class="login-header">
-                <i class="fas fa-lock"></i>
-                <h1>Admin Access</h1>
-            </div>
-            <form onsubmit="handleLogin(event)">
-                <input type="password" id="passwordInput" placeholder="Enter Admin Password" required>
-                <button type="submit" class="login-btn">
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </button>
-            </form>
-            <p class="login-hint">Enter the admin password to access the dashboard</p>
+
+  <!-- Login Section -->
+  <div class="login-container" id="loginContainer">
+    <div class="login-card">
+      <div class="login-header">
+        <i class="fas fa-lock"></i>
+        <h1>Admin Access</h1>
+        <p style="color:var(--text-muted);font-size:13px;margin-top:6px;">Enter password to manage orders</p>
+      </div>
+      <form onsubmit="handleLogin(event)">
+        <input type="password" id="passwordInput" placeholder="Admin Password" required>
+        <button type="submit" class="login-btn">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+      </form>
+      <p class="login-hint">🍗 Aravindh Chicken — Admin Panel</p>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div class="admin-container" id="adminContainer" style="display:none;">
+
+    <!-- Admin Navbar -->
+    <nav class="navbar admin-navbar">
+      <div class="nav-container">
+        <div class="logo">
+          <i class="fas fa-drumstick-bite"></i>
+          <span>Aravindh <em style="color:rgba(255,255,255,0.8);font-style:normal;">Admin</em></span>
         </div>
-    </div>
+        <div class="nav-links">
+          <button class="logout-btn" onclick="handleLogout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
+      </div>
+    </nav>
 
-    <!-- Admin Dashboard (hidden until login) -->
-    <div class="admin-container" id="adminContainer" style="display: none;">
-        <!-- Navigation Bar -->
-        <nav class="admin-navbar">
-            <div class="nav-container">
-                <div class="logo">
-                    <i class="fas fa-drumstick-bite"></i>
-                    <span>Aravindh Chicken - Admin</span>
-                </div>
-                <div class="nav-links">
-                    <button class="logout-btn" onclick="handleLogout()">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                </div>
-            </div>
-        </nav>
+    <!-- Admin Content -->
+    <section class="admin-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Dashboard</div>
+          <h1>Order Management</h1>
+          <p>View and manage all customer orders in real-time</p>
+        </div>
 
-        <!-- Admin Content -->
-        <section class="admin-section">
-            <div class="container">
-                <div class="section-header">
-                    <h1>📊 Order Management</h1>
-                    <p>View and manage all customer orders</p>
-                </div>
+        <!-- Controls -->
+        <div class="admin-controls">
+          <input type="text" id="searchOrders" placeholder="Search by Order ID, Name or Phone…" onkeyup="filterOrders()">
+          <select id="statusFilter" onchange="filterOrders()">
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Accepted">Accepted</option>
+            <option value="Preparing">Preparing</option>
+            <option value="Out For Delivery">Out For Delivery</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
 
-                <!-- Filter & Search -->
-                <div class="admin-controls">
-                    <input type="text" id="searchOrders" placeholder="Search by Order ID or Phone..." onkeyup="filterOrders()">
-                    <select id="statusFilter" onchange="filterOrders()">
-                        <option value="">All Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Accepted">Accepted</option>
-                        <option value="Preparing">Preparing</option>
-                        <option value="Out For Delivery">Out For Delivery</option>
-                        <option value="Delivered">Delivered</option>
-                        <option value="Cancelled">Cancelled</option>
-                    </select>
-                </div>
+        <div class="admin-top-actions">
+          <button class="refresh-btn" onclick="manualRefresh()">
+            <i class="fas fa-rotate-right"></i> Refresh Orders
+          </button>
+        </div>
 
-                <!-- Orders List -->
-                
-<div class="admin-top-actions">
-    <button class="refresh-btn" onclick="manualRefresh()">
-        <i class="fas fa-rotate-right"></i> Refresh Orders
-    </button>
-</div>
+        <div class="orders-container" id="ordersContainer">
+          <!-- Orders loaded dynamically -->
+        </div>
+      </div>
+    </section>
 
-<div class="orders-container" id="ordersContainer">
-                    <!-- Orders loaded dynamically -->
-                </div>
-            </div>
-        </section>
-    </div>
+  </div>
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <p>Loading...</p>
-    </div>
+  <!-- Loading -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
 
-    <!-- Toast Notification -->
-    <div class="toast" id="toast"></div>
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <p>&copy; 2024 Aravindh Chicken Shop Admin Panel</p>
-    </footer>
+  <!-- Footer -->
+  <footer class="footer">
+    <p>🍗 Aravindh Chicken Shop — Admin Panel &copy; 2024</p>
+  </footer>
 
-    <script src="admin.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>
